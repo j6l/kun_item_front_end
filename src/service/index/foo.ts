@@ -6,7 +6,7 @@ export interface IFooItem {
 
 /** GET 请求 */
 export const getFooAPI = (name: string) => {
-  return http.get<IFooItem>('/foo', { name })
+  return http.get<IFooItem>('/openapi/version', { name })
 }
 
 /** POST 请求 */

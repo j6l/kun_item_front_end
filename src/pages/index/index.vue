@@ -27,6 +27,9 @@
       模板分支是：
       <text class="text-green-500">base</text>
     </view>
+    <view class="mt-12">
+      <a href="https://iconpark.oceanengine.com/official">图标库</a>
+    </view>
   </view>
 </template>
 
