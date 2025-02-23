@@ -53,9 +53,7 @@ const httpInterceptor = {
     const userStore = useUserStore()
     const { token } = userStore.userInfo as unknown as IUserInfo
     if (token) {
-      options.header.Authorization = `Bearer ${token}`
-    } else {
-      options.header.Authorization = import.meta.env?.VITE_TOKEN
+      options.header.Authorization = token.includes('Bearer') ? token : `Bearer ${token}`
     }
   },
 }

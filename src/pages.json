@@ -70,7 +70,8 @@
       "path": "pages/categories/index",
       "type": "page",
       "style": {
-        "navigationBarTitleText": "类别管理"
+        "navigationBarTitleText": "类别管理",
+        "enablePullDownRefresh": true
       }
     },
     {
@@ -92,6 +93,13 @@
       "type": "page",
       "style": {
         "navigationBarTitleText": "库存_bak"
+      }
+    },
+    {
+      "path": "pages/login/login",
+      "type": "page",
+      "style": {
+        "navigationBarTitleText": "登录"
       }
     },
     {

@@ -3,6 +3,7 @@
 {
   style: {
     navigationBarTitleText: '类别管理',
+    enablePullDownRefresh: true,
   },
 }
 </route>
@@ -40,18 +41,30 @@
             </wd-col>
           </wd-row>
           <view class="" style="padding: 2px; text-align: right">
+            <wd-button type="text" @click="toDetail(item)" style="margin-right: 20rpx">
+              删除
+            </wd-button>
             <wd-button type="text" @click="toDetail(item)">修改</wd-button>
           </view>
         </wd-card>
       </view>
     </view>
   </view>
+  <wd-fab
+    type="primary"
+    position="right-bottom"
+    direction="top"
+    :expandable="false"
+    :draggable="true"
+    @click="toAddDetail"
+  />
 </template>
 
 <script lang="ts" setup>
 import { TestEnum } from '@/typings'
 import { IFooItem } from '@/service/index/foo'
-import { httpGet } from '@/utils/http'
+import { httpGet, httpPost } from '@/utils/http'
+import { empty } from '@/utils/test'
 
 defineOptions({
   name: 'categoriesList',
@@ -59,10 +72,12 @@ defineOptions({
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 
-onLoad(() => {
+onShow(() => {
   onQuery()
 })
-
+onPullDownRefresh(() => {
+  onQuery(1)
+})
 const query = ref({
   name: '',
 })
@@ -79,14 +94,33 @@ export interface Categories {
 }
 
 const datalist = ref<Categories[]>()
-function onQuery() {
-  const { loading, error, data, run } = useRequest<Categories[]>(
-    () => httpGet('/api/categories/list', query.value),
-    {
-      immediate: true,
-      initialData: datalist,
-    },
-  )
+
+function onQuery(ctype: number = 0) {
+  httpGet<Categories[]>('/api/categories/list', query.value)
+    .then((res) => {
+      console.log(res)
+      if (+res.code === 200) {
+        datalist.value = res.data
+        if (ctype === 1) {
+          uni.stopPullDownRefresh()
+          uni.showToast({
+            title: '刷新成功',
+            icon: 'none',
+          })
+        }
+      } else {
+        uni.showToast({
+          title: res.msg,
+          icon: 'error',
+        })
+      }
+    })
+    .catch((err) => {
+      uni.showToast({
+        title: err,
+        icon: 'error',
+      })
+    })
 }
 
 function toDetail({ objid }) {
@@ -95,17 +129,34 @@ function toDetail({ objid }) {
       '/pages/categories/edit?params=' +
       encodeURIComponent(
         JSON.stringify({
-          title: '修改类别',
+          title: empty(objid) ? '新增类别' : '修改类别',
           objid,
         }),
       ),
   })
 }
+
+function toAddDetail() {
+  toDetail({ objid: '' })
+}
 </script>
 
 <style lang="scss" scoped>
-::v-deep .wd-search__cancel {
+:deep(.wd-search__cancel) {
   font-size: 25rpx;
   color: #4e4e4e;
+}
+:deep(.custom-button) {
+  min-width: auto !important;
+  box-sizing: border-box;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 16px !important;
+  margin: 8rpx;
+}
+
+:deep(.custom-radio) {
+  height: 32px !important;
+  line-height: 32px !important;
 }
 </style>

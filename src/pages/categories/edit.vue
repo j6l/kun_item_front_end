@@ -50,23 +50,21 @@
             style="display: flex; justify-content: space-around; width: 98%; margin: 5rpx 10rpx"
           >
             <wd-button type="info" @click="closePage" v-if="editFlag" block>关闭</wd-button>
-            <wd-button type="primary" @click="handleSubmit" block>保存</wd-button>
-            <wd-button type="primary" @click="handleSubmit" v-if="!editFlag" block>
+            <wd-button type="primary" @click="handleSubmit(0)" block>保存</wd-button>
+            <wd-button type="primary" @click="handleSubmit(1)" v-if="!editFlag" block>
               保存并新增
             </wd-button>
           </view>
         </view>
       </wd-form>
     </view>
-    <wd-toast />
   </view>
 </template>
 
 <script lang="ts" setup>
-import { useToast } from 'wot-design-uni'
 import { httpGet, httpPost } from '@/utils/http'
 import { Categories } from '@/pages/categories/index.vue'
-import { UnwrapRef } from 'vue'
+import { empty } from '@/utils/test'
 
 defineOptions({
   name: 'categoriesDetail',
@@ -83,11 +81,11 @@ onLoad(async (options) => {
   if (objid) {
     getDetail(objid)
     editFlag.value = true
-    if (title) {
-      await uni.setNavigationBarTitle({
-        title,
-      })
-    }
+  }
+  if (title) {
+    await uni.setNavigationBarTitle({
+      title,
+    })
   }
 })
 
@@ -107,32 +105,45 @@ const editForm = ref<Categories>({
   sort: 99,
   remark: '',
 })
-const toast = useToast()
 const form = ref()
 
-function handleSubmit() {
+function handleSubmit(ctype: number) {
   form.value
     .validate()
     .then(({ valid, errors }) => {
       if (valid) {
-        httpPost('/api/categories/update', editForm.value)
+        const url = editFlag.value ? '/api/categories/update' : '/api/categories/add'
+        httpPost(url, editForm.value)
           .then((res) => {
             console.log(res)
-            toast.show({
-              position: 'bottom',
-              msg: '提交成功',
-            })
-            uni.navigateBack()
+            if (+res.code === 200) {
+              uni.showToast({
+                title: '保存成功',
+                icon: 'none',
+              })
+              if (ctype === 0) {
+                uni.navigateBack()
+              } else {
+                editForm.value = {
+                  objid: '',
+                  name: '',
+                  sort: 99,
+                  remark: '',
+                }
+              }
+            } else {
+              uni.showToast({
+                title: res.msg,
+                icon: 'error',
+              })
+            }
           })
           .catch((err) => {
-            toast.error({
-              position: 'bottom',
-              msg: err,
+            uni.showToast({
+              title: err,
+              icon: 'error',
             })
           })
-        setTimeout(() => {
-          uni.navigateBack()
-        }, 1000)
       }
     })
     .catch((error) => {

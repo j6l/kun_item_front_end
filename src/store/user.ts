@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
+export interface IUserInfo {
+  nickname: string
+  token: string
+  avatar: string
+}
 const initState = { nickname: '', token: '', avatar: '' }
 
 export const useUserStore = defineStore(
@@ -10,6 +15,7 @@ export const useUserStore = defineStore(
 
     const setUserInfo = (val: IUserInfo) => {
       userInfo.value = val
+      console.log('setUserInfo', userInfo.value)
     }
 
     const clearUserInfo = () => {

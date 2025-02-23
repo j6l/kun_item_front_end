@@ -11,6 +11,7 @@ interface NavigateToOptions {
        "/pages/inventory/filedetail" |
        "/pages/inventory/index" |
        "/pages/inventory/index_bak" |
+       "/pages/login/login" |
        "/pages/menu/index";
 }
 interface RedirectToOptions extends NavigateToOptions {}
