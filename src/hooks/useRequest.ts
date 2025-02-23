@@ -15,7 +15,7 @@ type IUseRequestOptions<T> = {
  * @param options.initialData 初始化数据，默认为undefined。
  * @returns 返回一个对象{loading, error, data, run}，包含请求的加载状态、错误信息、响应数据和手动触发请求的函数。
  */
-export default function useRequest<T>(
+export function useRequest<T>(
   func: () => Promise<IResData<T>>,
   options: IUseRequestOptions<T> = { immediate: false },
 ) {
@@ -41,4 +41,33 @@ export default function useRequest<T>(
 
   options.immediate && run()
   return { loading, error, data, run }
+}
+
+export function easyRequest<T>(func: () => Promise<IResData<T>>) {
+  return new Promise((resolve, reject) => {
+    func()
+      .then((res) => {
+        if (res.code === 200) {
+          resolve(res.data as UnwrapRef<T>)
+        } else if (res.code === 401) {
+          // 401错误  -> 清理用户信息，跳转到登录页
+          // userStore.clearUserInfo()
+          uni.showToast({
+            icon: 'error',
+            title: '登录失效',
+          })
+          uni.navigateTo({ url: '/pages/login/login' })
+          reject(res.msg)
+        } else {
+          uni.showToast({
+            title: res.msg,
+            icon: 'error',
+          })
+          reject(res.msg)
+        }
+      })
+      .catch((err) => {
+        reject(err)
+      })
+  })
 }

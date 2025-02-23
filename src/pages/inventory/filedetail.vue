@@ -84,12 +84,13 @@
         </view>
       </wd-form>
     </view>
-    <wd-toast />
   </view>
 </template>
 
 <script lang="ts" setup>
-import { useToast } from 'wot-design-uni'
+import { httpGet } from '@/utils/http'
+import { Inventory } from '@/pages/inventory/entity'
+import { easyRequest } from '@/hooks/useRequest'
 
 defineOptions({
   name: 'fileDetail',
@@ -98,8 +99,27 @@ defineOptions({
 // 获取屏幕边界到安全区域距离
 const { safeAreaInsets } = uni.getSystemInfoSync()
 
-// 测试 uni API 自动引入
-onLoad(() => {})
+const editFlag = ref(false)
+
+onLoad(async (options) => {
+  const { objid, title } = JSON.parse(options.params || '{}')
+  console.log(options)
+  if (objid) {
+    getDetail(objid)
+    editFlag.value = true
+  }
+  if (title) {
+    await uni.setNavigationBarTitle({
+      title,
+    })
+  }
+})
+
+const getDetail = async (objid: string) => {
+  easyRequest<Inventory>(() => httpGet('/api/feitem/detail', { objid })).then((res) => {
+    console.log(res, 'res')
+  })
+}
 
 const editForm = ref({
   name: '',
@@ -109,7 +129,6 @@ const editForm = ref({
   cost: '',
   remark: '',
 })
-const toast = useToast()
 const form = ref()
 
 function handleSubmit() {
@@ -117,9 +136,9 @@ function handleSubmit() {
     .validate()
     .then(({ valid, errors }) => {
       if (valid) {
-        toast.show({
-          position: 'bottom',
-          msg: '校验通过',
+        uni.showToast({
+          title: '校验通过',
+          icon: 'none',
         })
         setTimeout(() => {
           uni.navigateBack()

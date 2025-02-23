@@ -85,7 +85,8 @@
       "path": "pages/inventory/index",
       "type": "page",
       "style": {
-        "navigationBarTitleText": "库存"
+        "navigationBarTitleText": "库存",
+        "enablePullDownRefresh": true
       }
     },
     {

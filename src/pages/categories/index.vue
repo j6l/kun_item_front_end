@@ -65,6 +65,8 @@ import { TestEnum } from '@/typings'
 import { IFooItem } from '@/service/index/foo'
 import { httpGet, httpPost } from '@/utils/http'
 import { empty } from '@/utils/test'
+import { easyRequest } from '@/hooks/useRequest'
+import { Inventory } from '@/pages/inventory/entity'
 
 defineOptions({
   name: 'categoriesList',
@@ -96,31 +98,16 @@ export interface Categories {
 const datalist = ref<Categories[]>()
 
 function onQuery(ctype: number = 0) {
-  httpGet<Categories[]>('/api/categories/list', query.value)
-    .then((res) => {
-      console.log(res)
-      if (+res.code === 200) {
-        datalist.value = res.data
-        if (ctype === 1) {
-          uni.stopPullDownRefresh()
-          uni.showToast({
-            title: '刷新成功',
-            icon: 'none',
-          })
-        }
-      } else {
-        uni.showToast({
-          title: res.msg,
-          icon: 'error',
-        })
-      }
-    })
-    .catch((err) => {
+  easyRequest<Categories[]>(() => httpGet('/api/categories/list', query.value)).then((res) => {
+    datalist.value = res
+    if (ctype === 1) {
+      uni.stopPullDownRefresh()
       uni.showToast({
-        title: err,
-        icon: 'error',
+        title: '刷新成功',
+        icon: 'none',
       })
-    })
+    }
+  })
 }
 
 function toDetail({ objid }) {

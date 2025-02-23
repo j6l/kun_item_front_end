@@ -65,6 +65,8 @@
 import { httpGet, httpPost } from '@/utils/http'
 import { Categories } from '@/pages/categories/index.vue'
 import { empty } from '@/utils/test'
+import { easyRequest } from '@/hooks/useRequest'
+import { Inventory } from '@/pages/inventory/entity'
 
 defineOptions({
   name: 'categoriesDetail',
@@ -90,13 +92,9 @@ onLoad(async (options) => {
 })
 
 const getDetail = async (objid: string) => {
-  const { loading, error, data, run } = useRequest<Categories>(
-    () => httpGet('/api/categories/detail', { objid }),
-    {
-      immediate: true,
-      initialData: editForm,
-    },
-  )
+  easyRequest<Categories>(() => httpGet('/api/categories/detail', { objid })).then((res) => {
+    editForm.value = res
+  })
 }
 
 const editForm = ref<Categories>({
@@ -113,37 +111,22 @@ function handleSubmit(ctype: number) {
     .then(({ valid, errors }) => {
       if (valid) {
         const url = editFlag.value ? '/api/categories/update' : '/api/categories/add'
-        httpPost(url, editForm.value)
-          .then((res) => {
-            console.log(res)
-            if (+res.code === 200) {
-              uni.showToast({
-                title: '保存成功',
-                icon: 'none',
-              })
-              if (ctype === 0) {
-                uni.navigateBack()
-              } else {
-                editForm.value = {
-                  objid: '',
-                  name: '',
-                  sort: 99,
-                  remark: '',
-                }
-              }
-            } else {
-              uni.showToast({
-                title: res.msg,
-                icon: 'error',
-              })
+        easyRequest<Inventory>(() => httpPost(url, editForm.value)).then((res) => {
+          uni.showToast({
+            title: '保存成功',
+            icon: 'none',
+          })
+          if (ctype === 0) {
+            uni.navigateBack()
+          } else {
+            editForm.value = {
+              objid: '',
+              name: '',
+              sort: 99,
+              remark: '',
             }
-          })
-          .catch((err) => {
-            uni.showToast({
-              title: err,
-              icon: 'error',
-            })
-          })
+          }
+        })
       }
     })
     .catch((error) => {
