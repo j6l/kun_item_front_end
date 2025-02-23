@@ -9,12 +9,11 @@ on:
     - 'v*'
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [20.18]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
@@ -26,20 +25,6 @@ jobs:
       - run: pnpm run build:h5
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: './dist/build/h5'
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
         with:
           name: build-output
           path: './dist/build/h5'
