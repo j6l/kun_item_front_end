@@ -15,26 +15,39 @@ jobs:
       matrix:
         node-version: [20.18]
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js
-      - uses: digi-fry/setup-pnpm-node-action@v1
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
         with:
-          node-version: '20'
-          pnpm-version: '9'
+          version: 10
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
           cache: 'pnpm'
-      - run: pnpm i
+
+      - name: Install dependencies
+        run: pnpm install
       - run: pnpm run build:h5
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-output
           path: './dist/build/h5'
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: './dist/build/h5'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
