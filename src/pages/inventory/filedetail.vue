@@ -24,6 +24,17 @@
             placeholder="请输入名称"
             :rules="[{ required: true, message: '请填写名称' }]"
           />
+          <wd-picker
+            label-width="60px"
+            label="类别"
+            prop="classid"
+            :columns="classColumn"
+            v-model="editForm.classid"
+            value-key="objid"
+            label-key="name"
+            placeholder="请选择类别"
+            :rules="[{ required: true, message: '请填写名称' }]"
+          />
           <wd-input
             label-width="60px"
             label="单位"
@@ -38,30 +49,40 @@
             label-width="60px"
             label="数量"
             type="number"
-            prop="cost"
+            prop="ccount"
             maxlength="30"
             clearable
-            v-model="editForm.count"
+            v-model="editForm.ccount"
             placeholder="请输入数量"
           />
           <wd-input
             label-width="60px"
             label="价格"
             type="number"
-            prop="price"
+            prop="feprice"
             maxlength="30"
             clearable
-            v-model="editForm.price"
+            v-model="editForm.feprice"
             placeholder="请输入价格"
           />
           <wd-input
             label-width="60px"
             label="成本"
             type="number"
-            prop="cost"
+            prop="fecost"
             maxlength="30"
             clearable
-            v-model="editForm.cost"
+            v-model="editForm.fecost"
+            placeholder="请输入成本"
+          />
+          <wd-input
+            label-width="60px"
+            label="利润"
+            type="number"
+            maxlength="30"
+            clearable
+            disabled
+            v-model="fprofitStr"
             placeholder="请输入成本"
           />
           <wd-textarea
@@ -78,8 +99,11 @@
           <view
             style="display: flex; justify-content: space-around; width: 98%; margin: 5rpx 10rpx"
           >
-            <wd-button type="primary" @click="handleSubmit" block>保存</wd-button>
-            <wd-button type="primary" @click="handleSubmit" block>保存并新增</wd-button>
+            <wd-button type="info" @click="closePage" v-if="editFlag" block>关闭</wd-button>
+            <wd-button type="primary" @click="handleSubmit(0)" block>保存</wd-button>
+            <wd-button type="primary" @click="handleSubmit(1)" v-if="!editFlag" block>
+              保存并新增
+            </wd-button>
           </view>
         </view>
       </wd-form>
@@ -88,8 +112,8 @@
 </template>
 
 <script lang="ts" setup>
-import { httpGet } from '@/utils/http'
-import { Inventory } from '@/pages/inventory/entity'
+import { httpGet, httpPost } from '@/utils/http'
+import { Categories, Inventory } from '@/pages/inventory/entity'
 import { easyRequest } from '@/hooks/useRequest'
 
 defineOptions({
@@ -113,41 +137,80 @@ onLoad(async (options) => {
       title,
     })
   }
+  findColumn()
 })
 
 const getDetail = async (objid: string) => {
-  easyRequest<Inventory>(() => httpGet('/api/feitem/detail', { objid })).then((res) => {
-    console.log(res, 'res')
+  easyRequest<Inventory>(() => httpGet('/api/feitem/detail', { objid }))
+    .then((res) => {
+      editForm.value = res
+    })
+    .catch(() => {
+      closePage()
+    })
+}
+const classColumn = ref([])
+
+function findColumn() {
+  easyRequest<Categories[]>(() => httpGet('/api/categories/list')).then((res) => {
+    classColumn.value = res || []
   })
 }
 
-const editForm = ref({
+const editForm = ref<Inventory>({
+  objid: '',
   name: '',
+  classid: '',
   unit: '',
-  count: '',
-  price: '',
-  cost: '',
+  ccount: '',
+  feprice: '',
+  fecost: '',
   remark: '',
+})
+const fprofitStr = computed(() => {
+  const { feprice, fecost } = editForm.value
+  if (feprice && fecost) {
+    return (feprice - fecost).toFixed(2)
+  } else {
+    return ''
+  }
 })
 const form = ref()
 
-function handleSubmit() {
+function handleSubmit(ctype: number) {
   form.value
     .validate()
     .then(({ valid, errors }) => {
       if (valid) {
-        uni.showToast({
-          title: '校验通过',
-          icon: 'none',
+        const url = editFlag.value ? '/api/feitem/update' : '/api/feitem/add'
+        easyRequest<Inventory>(() => httpPost(url, editForm.value)).then((res) => {
+          uni.showToast({
+            title: '保存成功',
+            icon: 'none',
+          })
+          if (ctype === 0) {
+            uni.navigateBack()
+          } else {
+            editForm.value = {
+              objid: '',
+              name: '',
+              classid: '',
+              unit: '',
+              ccount: '',
+              feprice: '',
+              fecost: '',
+              remark: '',
+            }
+          }
         })
-        setTimeout(() => {
-          uni.navigateBack()
-        }, 1000)
       }
     })
     .catch((error) => {
       console.log(error, 'error')
     })
+}
+function closePage() {
+  uni.navigateBack()
 }
 </script>
 

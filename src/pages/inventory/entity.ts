@@ -1,9 +1,11 @@
 export interface Inventory {
-  objid: number
+  objid: string
   name: string
+  classid: string
   unit: string
-  count: number
-  price: number
+  ccount: number
+  fecost: number
+  feprice: number
   remark: string
 }
 

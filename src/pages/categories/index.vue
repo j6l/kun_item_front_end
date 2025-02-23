@@ -41,7 +41,7 @@
             </wd-col>
           </wd-row>
           <view class="" style="padding: 2px; text-align: right">
-            <wd-button type="text" @click="toDetail(item)" style="margin-right: 20rpx">
+            <wd-button style="margin-right: 20rpx" @click="toDel(item)" type="text">
               删除
             </wd-button>
             <wd-button type="text" @click="toDetail(item)">修改</wd-button>
@@ -107,6 +107,24 @@ function onQuery(ctype: number = 0) {
         icon: 'none',
       })
     }
+  })
+}
+
+function toDel({ objid }) {
+  uni.showModal({
+    title: '提示',
+    content: '确定删除?',
+    success: (res) => {
+      if (res.confirm) {
+        easyRequest(() => httpPost('/api/categories/del', { objid })).then((res) => {
+          uni.showToast({
+            title: '删除成功',
+            icon: 'none',
+          })
+          onQuery()
+        })
+      }
+    },
   })
 }
 

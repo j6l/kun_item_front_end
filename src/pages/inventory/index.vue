@@ -13,8 +13,8 @@
     :style="{ marginTop: safeAreaInsets?.top + 'px' }"
   >
     <view style="display: flex; justify-content: space-between; margin: 5rpx 30rpx 5rpx 50rpx">
-      <view style="font-size: 20rpx; color: #ed7770">库存 {{ num }}种</view>
-      <view style="font-size: 20rpx; color: #ed7770">近30天新增 {{ num }}种</view>
+      <view style="font-size: 20rpx; color: #ed7770">库存 {{ headerNum.count }}种</view>
+      <view style="font-size: 20rpx; color: #ed7770">近30天新增 {{ headerNum.count30 }}种</view>
     </view>
     <view class="mt-1">
       <wd-search
@@ -26,27 +26,53 @@
         @search="onQuery"
         @cancel="onQuery"
       />
-      <wd-drop-menu>
-        <wd-drop-menu-item v-model="query.ctype" :options="option1" />
-        <wd-drop-menu-item v-model="query.ctype2" :options="option2" />
-        <wd-drop-menu-item v-model="query.ctype3" :options="option3" />
-      </wd-drop-menu>
     </view>
     <view class="container">
-      <view v-for="item in datalist.calsslist" :key="item.objid">
-        <wd-card>
-          <wd-row class="mt-1">
-            <wd-col :span="8"><view class="">名称: 8</view></wd-col>
-            <wd-col :span="8"><view class="">单位: 8</view></wd-col>
-            <wd-col :span="8"><view class="">数量: 8</view></wd-col>
-            <wd-col :span="8"><view class="">价格: 8</view></wd-col>
-          </wd-row>
-          <view class="" style="padding: 2px; text-align: right">
-            <wd-button class="" style="margin-right: 20rpx" type="text">归档</wd-button>
-            <wd-button type="text" @click="toDetail({ id: item.objid })">修改</wd-button>
-          </view>
-        </wd-card>
-      </view>
+      <wd-collapse v-model="showclassid">
+        <wd-collapse-item
+          :title="item.name + '(' + item.count + ')'"
+          :name="item.objid"
+          v-for="item in datalist.classlist"
+          :key="item.objid"
+        >
+          <wd-card v-for="item2 in datalist.felist[item.objid]" :key="item2.objid">
+            <wd-row class="mt-1 text-xs">
+              <wd-col :span="10">
+                <view class="">名称: {{ item2.name }}</view>
+              </wd-col>
+              <wd-col :span="7">
+                <view class="">单位: {{ item2.unit }}</view>
+              </wd-col>
+              <wd-col :span="7">
+                <view class="">数量: {{ item2.ccount }}</view>
+              </wd-col>
+              <wd-col :span="7" :offset="10">
+                <view class="" style="display: flex">
+                  价格:
+                  <view class="text-base">{{ item2.feprice }}</view>
+                </view>
+              </wd-col>
+              <wd-col :span="7" @click="showFprofit(item2)">
+                <view class="" style="display: flex">
+                  利:
+                  <view :class="{'text-base': true ,' text-rose-500':showfprofitMap[item2.objid]}">
+                    {{ showfprofitMap[item2.objid] ? getFprofit(item2) : '***' }}
+                  </view>
+                </view>
+              </wd-col>
+              <wd-col :span="24">
+                <view class="">备注: {{ item2.remark }}</view>
+              </wd-col>
+            </wd-row>
+            <view class="" style="padding: 2px; text-align: right">
+              <wd-button style="margin-right: 20rpx" @click="toDel(item2)" type="text">
+                删除
+              </wd-button>
+              <wd-button type="text" @click="toDetail(item2)">修改</wd-button>
+            </view>
+          </wd-card>
+        </wd-collapse-item>
+      </wd-collapse>
     </view>
     <wd-fab
       type="primary"
@@ -62,7 +88,7 @@
 <script lang="ts" setup>
 import { TestEnum } from '@/typings'
 import PLATFORM from '@/utils/platform'
-import { httpGet } from '@/utils/http'
+import { httpGet, httpPost } from '@/utils/http'
 import { empty } from '@/utils/test'
 import { Categories, Inventory } from '@/pages/inventory/entity'
 import { easyRequest } from '@/hooks/useRequest'
@@ -82,15 +108,22 @@ onPullDownRefresh(() => {
 })
 
 interface DtoList {
-  calsslist: Categories[]
+  classlist: Categories[]
   felist: Map<string, Inventory>
 }
 
+const headerNum = reactive({
+  count: 0,
+  count30: 0,
+})
 const datalist = ref<DtoList>()
 
 function onQuery(ctype: number = 0) {
   easyRequest(() => httpGet<DtoList>('/api/feitem/list', query.value)).then((res) => {
+    showfprofitMap.value = {}
     datalist.value = res
+    const classlist = datalist.value.classlist || []
+    showclassid.value = classlist.length > 0 ? [classlist[0].objid] : []
     if (ctype === 1) {
       uni.stopPullDownRefresh()
       uni.showToast({
@@ -99,39 +132,31 @@ function onQuery(ctype: number = 0) {
       })
     }
   })
+  easyRequest(() => httpGet<DtoList>('/api/feitem/headernum', query.value)).then((res) => {
+    headerNum.count = res.countall || 0
+    headerNum.count30 = res.count30 || 0
+  })
 }
+
+const showclassid = ref([])
 
 const query = ref({
   name: '',
-  ctype: 0,
-  ctype2: 0,
-  ctype3: 0,
 })
 
-const cancel = () => {
-  query.value = {
-    name: '',
-    ctype: 0,
-    ctype2: 0,
-    ctype3: 0,
-  }
+const showfprofitMap = ref({})
+
+function showFprofit({ objid }) {
+  showfprofitMap.value[objid] = !(showfprofitMap.value[objid] || false)
 }
 
-const option1 = ref<Record<string, any>>([
-  { label: '全部商品', value: 0 },
-  { label: '新款商品', value: 1 },
-  { label: '活动商品', value: 2 },
-])
-const option2 = ref<Record<string, any>>([
-  { label: '综合', value: 0 },
-  { label: '销量', value: 1 },
-  { label: '上架时间', value: 2 },
-])
-const option3 = ref<Record<string, any>>([
-  { label: '综合', value: 0 },
-  { label: '销量', value: 1 },
-  { label: '上架时间', value: 2 },
-])
+function getFprofit({ feprice, fecost }) {
+  if (feprice && fecost) {
+    return (feprice - fecost).toFixed(2)
+  } else {
+    return ''
+  }
+}
 
 function toDetail({ objid }) {
   uni.navigateTo({
@@ -143,6 +168,23 @@ function toDetail({ objid }) {
           objid,
         }),
       ),
+  })
+}
+function toDel({ objid }) {
+  uni.showModal({
+    title: '提示',
+    content: '确定删除?',
+    success: (res) => {
+      if (res.confirm) {
+        easyRequest(() => httpPost('/api/feitem/del', { objid })).then((res) => {
+          uni.showToast({
+            title: '删除成功',
+            icon: 'none',
+          })
+          onQuery()
+        })
+      }
+    },
   })
 }
 
