@@ -1,5 +1,5 @@
 <!-- 使用 type="home" 属性设置首页，其他页面不需要设置，默认为page；推荐使用json5，更强大，且允许注释 -->
-<route lang="json5" type="page">
+<route lang="json5">
 {
   style: {
     navigationBarTitleText: '类别管理',
@@ -8,10 +8,7 @@
 }
 </route>
 <template>
-  <view
-    class="overflow-hidden pt-2 px-4 bg-gray-100"
-    :style="{ marginTop: safeAreaInsets?.top + 'px', height: '87vh' }"
-  >
+  <view class="overflow-hidden pt-2 px-4 bg-gray-100" :style="{ height: '100vh' }">
     <view class="mt-1">
       <wd-search
         v-model="query.name"
@@ -27,24 +24,26 @@
     <view class="container">
       <view v-for="item in datalist" :key="item.objid">
         <wd-card>
-          <wd-row class="mt-1">
-            <wd-col :span="8">
-              <view class="">名称: {{ item.name }}</view>
-            </wd-col>
-            <wd-col :span="8" :offset="8">
-              <view class="">序号: {{ item.sort }}</view>
-            </wd-col>
-          </wd-row>
-          <wd-row class="mt-1" v-show="item.remark">
-            <wd-col :span="24">
-              <view class="">备注: {{ item.remark }}</view>
-            </wd-col>
-          </wd-row>
-          <view class="" style="padding: 2px; text-align: right">
-            <wd-button style="margin-right: 20rpx" @click="toDel(item)" type="text">
-              删除
-            </wd-button>
-            <wd-button type="text" @click="toDetail(item)">修改</wd-button>
+          <view class="p-2">
+            <wd-row class="mt-1">
+              <wd-col :span="8">
+                <view class="">名称: {{ item.name }}</view>
+              </wd-col>
+              <wd-col :span="8" :offset="8">
+                <view class="">序号: {{ item.sort }}</view>
+              </wd-col>
+            </wd-row>
+            <wd-row class="mt-1" v-show="item.remark">
+              <wd-col :span="24">
+                <view class="">备注: {{ item.remark }}</view>
+              </wd-col>
+            </wd-row>
+            <view class="" style="padding: 2px; text-align: right">
+              <wd-button style="margin-right: 20rpx" @click="toDel(item)" type="text">
+                删除
+              </wd-button>
+              <wd-button type="text" @click="toDetail(item)">修改</wd-button>
+            </view>
           </view>
         </wd-card>
       </view>
@@ -67,6 +66,7 @@ import { httpGet, httpPost } from '@/utils/http'
 import { empty } from '@/utils/test'
 import { easyRequest } from '@/hooks/useRequest'
 import { Inventory } from '@/pages/inventory/entity'
+import { objectToQueryString } from '@/utils/common'
 
 defineOptions({
   name: 'categoriesList',
@@ -131,13 +131,11 @@ function toDel({ objid }) {
 function toDetail({ objid }) {
   uni.navigateTo({
     url:
-      '/pages/categories/edit?params=' +
-      encodeURIComponent(
-        JSON.stringify({
-          title: empty(objid) ? '新增类别' : '修改类别',
-          objid,
-        }),
-      ),
+      '/pages/categories/edit?' +
+      objectToQueryString({
+        title: empty(objid) ? '新增类别' : '修改类别',
+        objid,
+      }),
   })
 }
 

@@ -1,5 +1,5 @@
 <!-- 使用 type="home" 属性设置首页，其他页面不需要设置，默认为page；推荐使用json5，更强大，且允许注释 -->
-<route lang="json5" type="page">
+<route lang="json5" >
 {
   style: {
     navigationBarTitleText: '详情',
@@ -9,7 +9,7 @@
 <template>
   <view
     class="overflow-hidden pt-2 px-4 bg-gray-100"
-    :style="{ marginTop: safeAreaInsets?.top + 'px' }"
+    :style="{ height: '100vh' }"
   >
     <view class="mt-1">
       <wd-form ref="form" :model="editForm">
@@ -78,7 +78,7 @@ const { safeAreaInsets } = uni.getSystemInfoSync()
 const editFlag = ref(false)
 
 onLoad(async (options) => {
-  const { objid, title } = JSON.parse(options.params || '{}')
+  const { objid, title } = options || {}
   console.log(options)
   if (objid) {
     getDetail(objid)

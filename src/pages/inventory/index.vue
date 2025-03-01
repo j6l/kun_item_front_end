@@ -1,5 +1,5 @@
 <!-- 使用 type="home" 属性设置首页，其他页面不需要设置，默认为page；推荐使用json5，更强大，且允许注释 -->
-<route lang="json5" type="page">
+<route lang="json5" type="home">
 {
   style: {
     navigationBarTitleText: '库存',
@@ -8,10 +8,7 @@
 }
 </route>
 <template>
-  <view
-    class="overflow-hidden pt-2 px-4 bg-gray-100"
-    :style="{ marginTop: safeAreaInsets?.top + 'px' }"
-  >
+  <view class="overflow-hidden pt-2 px-4 bg-gray-100" :style="{ height: '100vh' }">
     <view style="display: flex; justify-content: space-between; margin: 5rpx 30rpx 5rpx 50rpx">
       <view style="font-size: 20rpx; color: #ed7770">库存 {{ headerNum.count }}种</view>
       <view style="font-size: 20rpx; color: #ed7770">近30天新增 {{ headerNum.count30 }}种</view>
@@ -55,7 +52,9 @@
               <wd-col :span="7" @click="showFprofit(item2)">
                 <view class="" style="display: flex">
                   利:
-                  <view :class="{'text-base': true ,' text-rose-500':showfprofitMap[item2.objid]}">
+                  <view
+                    :class="{ 'text-base': true, ' text-rose-500': showfprofitMap[item2.objid] }"
+                  >
                     {{ showfprofitMap[item2.objid] ? getFprofit(item2) : '***' }}
                   </view>
                 </view>
@@ -92,6 +91,7 @@ import { httpGet, httpPost } from '@/utils/http'
 import { empty } from '@/utils/test'
 import { Categories, Inventory } from '@/pages/inventory/entity'
 import { easyRequest } from '@/hooks/useRequest'
+import { objectToQueryString } from '@/utils/common'
 
 defineOptions({
   name: 'inventory',
@@ -161,13 +161,11 @@ function getFprofit({ feprice, fecost }) {
 function toDetail({ objid }) {
   uni.navigateTo({
     url:
-      '/pages/inventory/filedetail?params=' +
-      encodeURIComponent(
-        JSON.stringify({
-          title: empty(objid) ? '新增' : '修改',
-          objid,
-        }),
-      ),
+      '/pages/inventory/filedetail?' +
+      objectToQueryString({
+        title: empty(objid) ? '新增' : '修改',
+        objid,
+      }),
   })
 }
 function toDel({ objid }) {

@@ -1,5 +1,5 @@
 <!-- 使用 type="home" 属性设置首页，其他页面不需要设置，默认为page；推荐使用json5，更强大，且允许注释 -->
-<route lang="json5" type="page">
+<route lang="json5" >
 {
   style: {
     navigationBarTitleText: '登录',
@@ -9,7 +9,7 @@
 <template>
   <view
     class="overflow-hidden pt-2 px-4 bg-gray-100"
-    :style="{ marginTop: safeAreaInsets?.top + 'px', height: '87vh' }"
+    :style="{ height: '100vh' }"
   >
     <view class="img-a">
       <view class="t-b">
@@ -65,8 +65,8 @@ onLoad(() => {
 })
 
 const loginForm = reactive({
-  username: 'admin',
-  password: '123456',
+  username: '',
+  password: '',
 })
 
 function login() {
@@ -96,7 +96,7 @@ function login() {
             avatar: res.data.avatar,
           })
           uni.reLaunch({
-            url: '/pages/index/index',
+            url: '/pages/inventory/index',
           })
         } else {
           uni.showToast({
@@ -152,6 +152,7 @@ page {
 
 .login-view {
   width: 100%;
+  height: 75vh;
   position: relative;
   margin-top: -120rpx;
   background-color: #ffffff;

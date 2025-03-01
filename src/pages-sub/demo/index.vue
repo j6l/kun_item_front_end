@@ -1,4 +1,4 @@
-<route lang="json5" type="page">
+<route lang="json5" >
 {
   style: { navigationBarTitleText: '分包页面 标题' },
 }
