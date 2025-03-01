@@ -198,7 +198,7 @@ function toAddDetail() {
   color: #d14328;
 }
 ::v-deep .wd-search__cancel {
-  font-size: 25rpx;
+  font-size: 30rpx;
   color: #4e4e4e;
 }
 </style>

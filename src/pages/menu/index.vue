@@ -12,11 +12,14 @@
     :style="{ marginTop: safeAreaInsets?.top + 'px', height: '87vh' }"
   >
     <view style="display: grid; grid-template-columns: repeat(2, 1fr); grid-gap: 10rpx">
-      <view v-for="(item, index) in menulist" :key="index">
-        <wd-card class="h-8" @click="toNextUrl(item)">
-          <view class="centered-light-gray-bg">{{ item.name }}</view>
-        </wd-card>
-      </view>
+      <wd-card
+        v-for="(item, index) in menulist"
+        :key="index"
+        class="h-8 p-0.5"
+        @click="toNextUrl(item)"
+      >
+        <view class="centered-light-gray-bg mt-1">{{ item.name }}</view>
+      </wd-card>
     </view>
   </view>
 </template>
@@ -52,6 +55,6 @@ function toNextUrl({ url }) {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f0f0f0; /* 浅灰色背景 */
+  background-color: #ffffff;
 }
 </style>
