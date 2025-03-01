@@ -2,11 +2,12 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export interface IUserInfo {
-  nickname: string
   token: string
+  refreshtoken: string
+  nickname: string
   avatar: string
 }
-const initState = { nickname: '', token: '', avatar: '' }
+const initState = { nickname: '', token: '', refreshtoken: '', avatar: '' }
 
 export const useUserStore = defineStore(
   'user',
@@ -16,6 +17,13 @@ export const useUserStore = defineStore(
     const setUserInfo = (val: IUserInfo) => {
       userInfo.value = val
       console.log('setUserInfo', userInfo.value)
+    }
+    const setToken = (val: string, refreshval: string) => {
+      userInfo.value.token = val
+      if (refreshval) {
+        userInfo.value.refreshtoken = refreshval
+      }
+      console.log('setToken', userInfo.value)
     }
 
     const clearUserInfo = () => {
@@ -30,6 +38,7 @@ export const useUserStore = defineStore(
     return {
       userInfo,
       setUserInfo,
+      setToken,
       clearUserInfo,
       isLogined,
       reset,

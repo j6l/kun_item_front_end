@@ -1,4 +1,47 @@
 import { CustomRequestOptions } from '@/interceptors/request'
+import { IUserInfo, useUserStore } from '@/store'
+import { UnwrapRef } from 'vue'
+
+function refreshtoken(options: CustomRequestOptions, resolve, reject) {
+  const userStore = useUserStore()
+  const { refreshtoken } = userStore.userInfo
+  if (refreshtoken) {
+    httpPost('/openapi/refreshtoken', {
+      refreshtoken: userStore.userInfo.refreshtoken,
+    })
+      .then((res) => {
+        if (res.code === 200) {
+          userStore.setToken(res.data.token, res.data.refreshtoken)
+          http(options)
+            .then((res) => {
+              resolve(res)
+            })
+            .catch((err) => {
+              reject(err)
+            })
+        } else if (res.code === 401) {
+          // 401错误  -> 清理用户信息，跳转到登录页
+          // userStore.clearUserInfo()
+          uni.showToast({
+            icon: 'error',
+            title: '登录失效',
+          })
+          uni.navigateTo({ url: '/pages/login/login' })
+          reject(res.msg)
+        } else {
+          uni.showToast({
+            title: res.msg,
+            icon: 'error',
+          })
+          uni.navigateTo({ url: '/pages/login/login' })
+          reject(res.msg)
+        }
+      })
+      .catch((err) => {
+        reject(err)
+      })
+  }
+}
 
 export const http = <T>(options: CustomRequestOptions) => {
   // 1. 返回 Promise 对象
@@ -25,6 +68,8 @@ export const http = <T>(options: CustomRequestOptions) => {
           })
           uni.navigateTo({ url: '/pages/login/login' })
           reject(res)
+        } else if (res.statusCode === 409) {
+          refreshtoken(options, resolve, reject)
         } else {
           // 其他错误 -> 根据后端错误信息轻提示
           !options.hideErrorToast &&

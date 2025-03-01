@@ -91,6 +91,7 @@ function login() {
           })
           useUserStore().setUserInfo({
             token: res.data.token || '',
+            refreshtoken: res.data.refreshtoken || '',
             nickname: res.data.nickname || '',
             avatar: res.data.avatar,
           })
