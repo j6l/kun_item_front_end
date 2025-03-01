@@ -39,6 +39,9 @@ jobs:
       - name: Enable pnpm
         run: corepack enable
 
+      - name: pnpm Version
+        run: corepack prepare pnpm@10.0.0 --activate
+
       - name: Install Dependencies
         run: pnpm install # 或 yarn install，根据你的偏好选择
 
