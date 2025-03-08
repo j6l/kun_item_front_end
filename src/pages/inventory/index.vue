@@ -8,7 +8,10 @@
 }
 </route>
 <template>
-  <view class="overflow-hidden pt-2 px-4 bg-gray-100" :style="{ height: '100vh' }">
+  <view
+    class="overflow-hidden pt-2 px-4 bg-gray-100"
+    :style="{ height: '100vh', 'overflow-y': 'scroll' }"
+  >
     <view style="display: flex; justify-content: space-between; margin: 5rpx 30rpx 5rpx 50rpx">
       <view style="font-size: 20rpx; color: #ed7770">库存 {{ headerNum.count }}种</view>
       <view style="font-size: 20rpx; color: #ed7770">近30天新增 {{ headerNum.count30 }}种</view>

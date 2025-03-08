@@ -8,7 +8,10 @@
 }
 </route>
 <template>
-  <view class="overflow-hidden pt-2 px-4 bg-gray-100" :style="{ height: '100vh' }">
+  <view
+    class="overflow-hidden pt-2 px-4 bg-gray-100 bodyclass"
+    :style="{ height: '100vh', 'overflow-y': 'scroll' }"
+  >
     <view class="mt-1">
       <wd-search
         v-model="query.name"
@@ -161,5 +164,8 @@ function toAddDetail() {
 :deep(.custom-radio) {
   height: 32px !important;
   line-height: 32px !important;
+}
+.bodyclass::-webkit-scrollbar {
+  display: none;
 }
 </style>
